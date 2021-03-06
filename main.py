@@ -118,12 +118,9 @@ def get_table(source, title):
     headers = ['Язык программирования', 'Вакансий найдено',
                'Вакансий обработано', 'Средняя зарплата']
     table_data.append(headers)
-    for key in source.keys():
-        new_row = []
-        new_row.append(key)
-        new_row.append(source[key]['vacancies_found'])
-        new_row.append(source[key]['vacancies_processed'])
-        new_row.append(source[key]['average_salary'])
+    for k, v in source.items():
+        vacancies_found, vacancies_processed, average_salary = v.values()
+        new_row = [k, vacancies_found, vacancies_processed, average_salary]
         table_data.append(new_row)
     table = AsciiTable(table_data)
     table.title = title
