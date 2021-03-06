@@ -33,23 +33,19 @@ def get_all_vacancies_from_hh(vacancies, language='Python', text='Програм
             vacancies[language].append(vacancy)
 
 
-def predict_salary(currency, payment_from, payment_to):
-    if currency != 'RUR' and currency != 'rub':
-        return None
-    if payment_from is not None and payment_from != 0:
-        if payment_to is not None and payment_to != 0:
-            return int((payment_from + payment_to) / 2)
-        else:
-            return int(payment_from * 1.2)
-    else:
-        if payment_to is not None and payment_to != 0:
-            return int(payment_to * 0.8)
-        return None
+def predict_salary(payment_from, payment_to):
+    if payment_from and payment_to:
+        return int((payment_from + payment_to) / 2)
+    elif payment_from:
+        return int(payment_from * 1.2)
+    elif payment_to:
+        return int(payment_to * 0.8)
+    return None
 
 
 def predict_rub_salary_hh(salary):
-    return predict_salary(salary['currency'],
-                          salary['from'], salary['to'])
+    if salary['currency'] == 'RUR':
+        return predict_salary(salary['from'], salary['to'])
 
 
 def get_salary_of_vacancies_hh(vacancies, language='Python'):
@@ -86,8 +82,8 @@ def get_vacancies_from_sj(secret_key_sj, login_sj, password_sj, id_sj, town=4, p
 
 
 def predict_rub_salary_sj(vacancy):
-    return predict_salary(vacancy['currency'],
-                          vacancy['payment_from'], vacancy['payment_to'])
+    if vacancy['currency'] == 'rub':
+        return predict_salary(vacancy['payment_from'], vacancy['payment_to'])
 
 
 def get_all_vacancies_from_sj(vacancies, secret_key_sj, login_sj,
