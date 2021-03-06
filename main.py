@@ -44,17 +44,19 @@ def predict_salary(payment_from, payment_to):
 
 
 def predict_rub_salary_hh(salary):
-    if salary['currency'] == 'RUR':
+    if salary and salary['currency'] == 'RUR':
         return predict_salary(salary['from'], salary['to'])
 
 
-def get_salary_of_vacancies_hh(vacancies, language='Python'):
+def get_salary_of_vacancies(vacancies, language='Python', source='sj'):
     salaries = []
     for vacancy in vacancies[language]:
-        if vacancy['salary'] is not None:
-            predict_salary_hh = predict_rub_salary_hh(vacancy['salary'])
-            if predict_salary_hh is not None:
-                salaries.append(predict_salary_hh)
+        if source == 'sj':
+            salary = predict_rub_salary_sj(vacancy)
+        else:
+            salary = predict_rub_salary_hh(vacancy['salary'])
+        if salary:
+            salaries.append(salary)
     if len(salaries) > 0:
         return int(sum(salaries) / len(salaries)), len(salaries)
 
@@ -97,16 +99,6 @@ def get_all_vacancies_from_sj(vacancies, secret_key_sj, login_sj,
         for vacancy in response['objects']:
             vacancies[language].append(vacancy)
         page += 1
-
-
-def get_salary_of_vacancies_sj(vacancies, language='Python'):
-    salaries = []
-    for vacancy in vacancies[language]:
-        predict_salary_sj = predict_rub_salary_sj(vacancy)
-        if predict_salary_sj is not None:
-            salaries.append(predict_salary_sj)
-    if len(salaries) > 0:
-        return int(sum(salaries) / len(salaries)), len(salaries)
 
 
 def get_table(source, title):
@@ -152,12 +144,10 @@ def count_average_salary(secret_key_sj, login_sj, password_sj, id_sj, source='sj
             languages[name_language]['vacancies_found'] = \
                 get_vacancies_from_sj(secret_key_sj,
                                       login_sj, password_sj, id_sj, language=name_language)['total']
-            languages[name_language]['average_salary'], languages[name_language]['vacancies_processed'] \
-                = get_salary_of_vacancies_sj(vacancies, name_language)
         else:
             languages[name_language]['vacancies_found'] = get_number_of_vacancies_hh(language=name_language)
-            languages[name_language]['average_salary'], languages[name_language]['vacancies_processed'] \
-                = get_salary_of_vacancies_hh(vacancies, name_language)
+        languages[name_language]['average_salary'], languages[name_language]['vacancies_processed'] \
+            = get_salary_of_vacancies(vacancies, name_language, source=source)
     return languages
 
 
