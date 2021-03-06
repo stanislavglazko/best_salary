@@ -1,11 +1,11 @@
-import json
 import os
 import requests
 from dotenv import load_dotenv
 from terminaltables import AsciiTable
 
 
-def get_vacancies_from_hh(language='Python', text='Программист', area=1, period=30, page=0):
+def get_vacancies_from_hh(language='Python',
+                          text='Программист', area=1, period=30, page=0):
     url = 'https://api.hh.ru/vacancies'
     headers = {'User-Agent': 'best_salary/1.0 (stanislavglazko@gmail.com)'}
     payload = {'text': f'{text} {language}',
@@ -18,15 +18,18 @@ def get_vacancies_from_hh(language='Python', text='Программист', area
 def get_number_of_vacancies_hh(language='Python',
                                text='Программист', area=1, period=30, page=0):
     return get_vacancies_from_hh(language=language, text=text,
-                                 area=area, period=period, page=page)['found']
+                                 area=area, period=period,
+                                 page=page)['found']
 
 
-def get_all_vacancies_from_hh(vacancies, language='Python', text='Программист', area=1, period=30):
+def get_all_vacancies_from_hh(vacancies, language='Python',
+                              text='Программист', area=1, period=30):
     page = 0
     pages_number = 1
     while page < pages_number:
         response = get_vacancies_from_hh(language=language,
-                                         text=text, area=area, period=period, page=page)
+                                         text=text, area=area,
+                                         period=period, page=page)
         pages_number = min(int(response['found'] / 20), 100)
         page += 1
         for vacancy in response['items']:
@@ -71,7 +74,8 @@ def sj_authorization(secret_key_sj, login_sj, password_sj, id_sj):
     return response.json()['access_token']
 
 
-def get_vacancies_from_sj(secret_key_sj, login_sj, password_sj, id_sj, town=4, page=0, language='Python'):
+def get_vacancies_from_sj(secret_key_sj, login_sj,
+                          password_sj, id_sj, town=4, page=0, language='Python'):
     url = 'https://api.superjob.ru/2.33/vacancies/'
     token = sj_authorization(secret_key_sj, login_sj, password_sj, id_sj)
     headers = {'X-Api-App-Id': secret_key_sj,
@@ -89,12 +93,14 @@ def predict_rub_salary_sj(vacancy):
 
 
 def get_all_vacancies_from_sj(vacancies, secret_key_sj, login_sj,
-                              password_sj, id_sj, town=4, page=0, language='Python'):
+                              password_sj, id_sj,
+                              town=4, page=0, language='Python'):
     page = 0
     more_vacancies = True
     while more_vacancies:
         response = get_vacancies_from_sj(secret_key_sj, login_sj,
-                                         password_sj, id_sj, town=town, page=page, language=language)
+                                         password_sj, id_sj,
+                                         town=town, page=page, language=language)
         more_vacancies = response['more']
         for vacancy in response['objects']:
             vacancies[language].append(vacancy)
@@ -123,29 +129,36 @@ def get_table_sj(languages, title='SuperJob Moscow'):
     return get_table(languages, title)
 
 
-def collect_vacancies_for_top8(secret_key_sj, login_sj, password_sj, id_sj, source='sj'):
-    top_8_languages = ['JavaScript', 'Java', 'Python', 'Ruby', 'PHP', 'C++', 'C#', 'Go']
+def collect_vacancies_for_top8(secret_key_sj, login_sj,
+                               password_sj, id_sj, source='sj'):
+    top_8_languages = ['JavaScript', 'Java', 'Python',
+                       'Ruby', 'PHP', 'C++', 'C#', 'Go']
     vacancies = {}
     for name in top_8_languages:
         vacancies[name] = []
         if source == 'sj':
-            get_all_vacancies_from_sj(vacancies, secret_key_sj, login_sj, password_sj, id_sj, language=name)
+            get_all_vacancies_from_sj(vacancies, secret_key_sj,
+                                      login_sj, password_sj, id_sj, language=name)
         else:
             get_all_vacancies_from_hh(vacancies, language=name)
     return vacancies
 
 
 def count_average_salary(secret_key_sj, login_sj, password_sj, id_sj, source='sj'):
-    vacancies = collect_vacancies_for_top8(secret_key_sj, login_sj, password_sj, id_sj, source=source)
+    vacancies = collect_vacancies_for_top8(secret_key_sj,
+                                           login_sj, password_sj, id_sj, source=source)
     languages = {}
     for name_language in vacancies.keys():
-        languages[name_language] = {'vacancies_found': 0, 'vacancies_processed': 0, 'average_salary': 0}
+        languages[name_language] = {'vacancies_found': 0,
+                                    'vacancies_processed': 0, 'average_salary': 0}
         if source == 'sj':
             languages[name_language]['vacancies_found'] = \
                 get_vacancies_from_sj(secret_key_sj,
-                                      login_sj, password_sj, id_sj, language=name_language)['total']
+                                      login_sj, password_sj,
+                                      id_sj, language=name_language)['total']
         else:
-            languages[name_language]['vacancies_found'] = get_number_of_vacancies_hh(language=name_language)
+            languages[name_language]['vacancies_found'] = \
+                get_number_of_vacancies_hh(language=name_language)
         languages[name_language]['average_salary'], languages[name_language]['vacancies_processed'] \
             = get_salary_of_vacancies(vacancies, name_language, source=source)
     return languages
@@ -157,8 +170,10 @@ def main():
     login_sj = os.getenv("LOGIN_SUPERJOB")
     password_sj = os.getenv("PASSWORD_SUPERJOB")
     id_sj = os.getenv("CLIENT_ID_SUPERJOB")
-    table_hh = get_table_hh(count_average_salary(secret_key_sj, login_sj, password_sj, id_sj, source='hh'))
-    table_sj = get_table_sj(count_average_salary(secret_key_sj, login_sj, password_sj, id_sj, source='sj'))
+    table_hh = get_table_hh(count_average_salary(secret_key_sj,
+                                                 login_sj, password_sj, id_sj, source='hh'))
+    table_sj = get_table_sj(count_average_salary(secret_key_sj,
+                                                 login_sj, password_sj, id_sj, source='sj'))
     print(table_hh.table)
     print(table_sj.table)
 
