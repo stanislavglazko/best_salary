@@ -113,7 +113,7 @@ def get_salary_of_vacancies_sj(vacancies, language='Python'):
         return int(sum(salaries) / len(salaries)), len(salaries)
 
 
-def print_table(source, title):
+def get_table(source, title):
     table_data = []
     headers = ['Язык программирования', 'Вакансий найдено',
                'Вакансий обработано', 'Средняя зарплата']
@@ -127,15 +127,15 @@ def print_table(source, title):
         table_data.append(new_row)
     table = AsciiTable(table_data)
     table.title = title
-    print(table.table)
+    return table
 
 
-def print_table_hh(languages, title='HeadHunter Moscow'):
-    print_table(languages, title)
+def get_table_hh(languages, title='HeadHunter Moscow'):
+    return get_table(languages, title)
 
 
-def print_table_sj(languages, title='SuperJob Moscow'):
-    print_table(languages, title)
+def get_table_sj(languages, title='SuperJob Moscow'):
+    return get_table(languages, title)
 
 
 def collect_vacancies_for_top8(secret_key, login, password, id, source='sj'):
@@ -174,8 +174,10 @@ def main():
     login = os.getenv("LOGIN_SUPERJOB")
     password = os.getenv("PASSWORD_SUPERJOB")
     id = os.getenv("CLIENT_ID_SUPERJOB")
-    print_table_sj(count_average_salary(secret_key, login, password, id, source='sj'))
-    print_table_hh(count_average_salary(secret_key, login, password, id, source='hh'))
+    table_hh = get_table_hh(count_average_salary(secret_key, login, password, id, source='hh'))
+    table_sj = get_table_sj(count_average_salary(secret_key, login, password, id, source='sj'))
+    print(table_hh.table)
+    print(table_sj.table)
 
 
 if __name__ == '__main__':
