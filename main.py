@@ -17,13 +17,6 @@ def get_vacancies_from_hh(language='Python',
     return response.json()
 
 
-def get_number_of_vacancies_hh(language='Python',
-                               text='Программист', area=1, period=30, page=0):
-    return get_vacancies_from_hh(language=language, text=text,
-                                 area=area, period=period,
-                                 page=page)['found']
-
-
 def get_all_vacancies_from_hh(vacancies, language='Python',
                               text='Программист', area=1, period=30):
     page = 0
@@ -145,7 +138,7 @@ def count_average_salary_hh():
         languages[name_language] = {'vacancies_found': 0,
                                     'vacancies_processed': 0, 'average_salary': 0}
         languages[name_language]['vacancies_found'] = \
-            get_number_of_vacancies_hh(language=name_language)
+            get_vacancies_from_hh(language=name_language)['found']
         languages[name_language]['average_salary'], languages[name_language]['vacancies_processed'] \
             = get_salary_of_vacancies_hh(vacancies, name_language)
     return languages
