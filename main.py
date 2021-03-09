@@ -10,8 +10,12 @@ def get_vacancies_from_hh(language='Python',
                           text='Программист', area=1, period=30, page=0):
     url = 'https://api.hh.ru/vacancies'
     headers = {'User-Agent': 'best_salary/1.0 (stanislavglazko@gmail.com)'}
-    payload = {'text': f'{text} {language}',
-               'area': area, 'period': period, 'page': page}
+    payload = {
+        'text': f'{text} {language}',
+        'area': area,
+        'period': period,
+        'page': page,
+    }
     response = requests.get(url, headers=headers, params=payload)
     response.raise_for_status()
     return response.json()
@@ -69,8 +73,12 @@ def get_salary_of_vacancies_sj(vacancies, language='Python'):
 def sj_authorization(secret_key_sj, login_sj, password_sj, id_sj):
     url = 'https://api.superjob.ru/2.33/oauth2/password/'
     headers = {'X-Api-App-Id': secret_key_sj}
-    payload = {'login': login_sj, 'password': password_sj,
-               'client_id': id_sj, 'client_secret': secret_key_sj}
+    payload = {
+        'login': login_sj,
+        'password': password_sj,
+        'client_id': id_sj,
+        'client_secret': secret_key_sj,
+    }
     response = requests.post(url, headers=headers, params=payload)
     response.raise_for_status()
     return response.json()['access_token']
@@ -80,10 +88,16 @@ def get_vacancies_from_sj(secret_key_sj, login_sj,
                           password_sj, id_sj, town=4, page=0, language='Python'):
     url = 'https://api.superjob.ru/2.33/vacancies/'
     token = sj_authorization(secret_key_sj, login_sj, password_sj, id_sj)
-    headers = {'X-Api-App-Id': secret_key_sj,
-               'Authorization': f'Bearer {token}'}
-    payload = {'keyword': f'Программист {language}',
-               'town': town, 'count': 100, 'page': page}
+    headers = {
+        'X-Api-App-Id': secret_key_sj,
+        'Authorization': f'Bearer {token}',
+    }
+    payload = {
+        'keyword': f'Программист {language}',
+        'town': town,
+        'count': 100,
+        'page': page,
+    }
     response = requests.get(url, headers=headers, params=payload)
     response.raise_for_status()
     return response.json()
@@ -100,9 +114,15 @@ def get_all_vacancies_from_sj(vacancies, secret_key_sj, login_sj,
     page = 0
     more_vacancies = True
     while more_vacancies:
-        response = get_vacancies_from_sj(secret_key_sj, login_sj,
-                                         password_sj, id_sj,
-                                         town=town, page=page, language=language)
+        response = get_vacancies_from_sj(
+            secret_key_sj,
+            login_sj,
+            password_sj,
+            id_sj,
+            town=town,
+            page=page,
+            language=language,
+        )
         more_vacancies = response['more']
         for vacancy in response['objects']:
             vacancies[language].append(vacancy)
@@ -111,19 +131,36 @@ def get_all_vacancies_from_sj(vacancies, secret_key_sj, login_sj,
 
 def get_table(languages, title='SuperJob Moscow'):
     table_data = []
-    headers = ['Язык программирования', 'Вакансий найдено',
-               'Вакансий обработано', 'Средняя зарплата']
+    headers = [
+        'Язык программирования',
+        'Вакансий найдено',
+        'Вакансий обработано',
+        'Средняя зарплата',
+    ]
     table_data.append(headers)
     for language, statistic in languages.items():
-        new_row = [language, statistic['vacancies_found'], statistic['vacancies_processed'], statistic['average_salary']]
+        new_row = [
+            language,
+            statistic['vacancies_found'],
+            statistic['vacancies_processed'],
+            statistic['average_salary'],
+        ]
         table_data.append(new_row)
     table = AsciiTable(table_data, title=title)
     return table
 
 
 def collect_vacancies_for_top8_hh():
-    top_8_languages = ['JavaScript', 'Java', 'Python',
-                       'Ruby', 'PHP', 'C++', 'C#', 'Go']
+    top_8_languages = [
+        'JavaScript',
+        'Java',
+        'Python',
+        'Ruby',
+        'PHP',
+        'C++',
+        'C#',
+        'Go',
+    ]
     vacancies = {}
     for name in top_8_languages:
         vacancies[name] = []
@@ -135,8 +172,11 @@ def count_average_salary_hh():
     vacancies = collect_vacancies_for_top8_hh()
     languages = {}
     for name_language in vacancies.keys():
-        languages[name_language] = {'vacancies_found': 0,
-                                    'vacancies_processed': 0, 'average_salary': 0}
+        languages[name_language] = {
+            'vacancies_found': 0,
+            'vacancies_processed': 0,
+            'average_salary': 0,
+        }
         languages[name_language]['vacancies_found'] = \
             get_vacancies_from_hh(language=name_language)['found']
         languages[name_language]['average_salary'], languages[name_language]['vacancies_processed'] \
@@ -145,24 +185,52 @@ def count_average_salary_hh():
 
 
 def collect_vacancies_for_top8_sj(secret_key_sj, login_sj, password_sj, id_sj):
-    top_8_languages = ['JavaScript', 'Java', 'Python',
-                       'Ruby', 'PHP', 'C++', 'C#', 'Go']
+    top_8_languages = [
+        'JavaScript',
+        'Java',
+        'Python',
+        'Ruby',
+        'PHP',
+        'C++',
+        'C#',
+        'Go',
+    ]
     vacancies = {}
     for name in top_8_languages:
         vacancies[name] = []
-        get_all_vacancies_from_sj(vacancies, secret_key_sj, login_sj, password_sj, id_sj, language=name)
+        get_all_vacancies_from_sj(
+            vacancies,
+            secret_key_sj,
+            login_sj,
+            password_sj,
+            id_sj,
+            language=name,
+        )
     return vacancies
 
 
 def count_average_salary_sj(secret_key_sj, login_sj, password_sj, id_sj):
-    vacancies = collect_vacancies_for_top8_sj(secret_key_sj,
-                                           login_sj, password_sj, id_sj)
+    vacancies = collect_vacancies_for_top8_sj(
+        secret_key_sj,
+        login_sj,
+        password_sj,
+        id_sj,
+    )
     languages = {}
     for name_language in vacancies.keys():
-        languages[name_language] = {'vacancies_found': 0,
-                                    'vacancies_processed': 0, 'average_salary': 0}
+        languages[name_language] = {
+            'vacancies_found': 0,
+            'vacancies_processed': 0,
+            'average_salary': 0,
+        }
         languages[name_language]['vacancies_found'] = \
-            get_vacancies_from_sj(secret_key_sj, login_sj, password_sj, id_sj, language=name_language)['total']
+            get_vacancies_from_sj(
+                secret_key_sj,
+                login_sj,
+                password_sj,
+                id_sj,
+                language=name_language,
+            )['total']
         languages[name_language]['average_salary'], languages[name_language]['vacancies_processed'] \
             = get_salary_of_vacancies_sj(vacancies, name_language)
     return languages
