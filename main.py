@@ -114,13 +114,13 @@ def get_all_vacancies_from_sj(vacancies, secret_key_sj, login_sj,
         page += 1
 
 
-def get_table(source, title='SuperJob Moscow'):
+def get_table(languages, title='SuperJob Moscow'):
     table_data = []
     headers = ['Язык программирования', 'Вакансий найдено',
                'Вакансий обработано', 'Средняя зарплата']
     table_data.append(headers)
-    for language, v in source.items():
-        new_row = [language, v['vacancies_found'], v['vacancies_processed'], v['average_salary']]
+    for language, statistic in languages.items():
+        new_row = [language, statistic['vacancies_found'], statistic['vacancies_processed'], statistic['average_salary']]
         table_data.append(new_row)
     table = AsciiTable(table_data, title=title)
     return table
