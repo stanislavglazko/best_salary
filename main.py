@@ -51,13 +51,20 @@ def predict_rub_salary_hh(salary):
         return predict_salary(salary['from'], salary['to'])
 
 
-def get_salary_of_vacancies(vacancies, language='Python', source='sj'):
+def get_salary_of_vacancies_hh(vacancies, language='Python'):
     salaries = []
     for vacancy in vacancies[language]:
-        if source == 'sj':
-            salary = predict_rub_salary_sj(vacancy)
-        else:
-            salary = predict_rub_salary_hh(vacancy['salary'])
+        salary = predict_rub_salary_hh(vacancy['salary'])
+        if salary:
+            salaries.append(salary)
+    if len(salaries) > 0:
+        return int(sum(salaries) / len(salaries)), len(salaries)
+
+
+def get_salary_of_vacancies_sj(vacancies, language='Python'):
+    salaries = []
+    for vacancy in vacancies[language]:
+        salary = predict_rub_salary_sj(vacancy)
         if salary:
             salaries.append(salary)
     if len(salaries) > 0:
@@ -107,60 +114,62 @@ def get_all_vacancies_from_sj(vacancies, secret_key_sj, login_sj,
         page += 1
 
 
-def get_table(source, title):
+def get_table(source, title='SuperJob Moscow'):
     table_data = []
     headers = ['Язык программирования', 'Вакансий найдено',
                'Вакансий обработано', 'Средняя зарплата']
     table_data.append(headers)
     for language, v in source.items():
-        vacancies_found, vacancies_processed, average_salary = v.values()
-        new_row = [language, vacancies_found, vacancies_processed, average_salary]
+        new_row = [language, v['vacancies_found'], v['vacancies_processed'], v['average_salary']]
         table_data.append(new_row)
-    table = AsciiTable(table_data)
-    table.title = title
+    table = AsciiTable(table_data, title=title)
     return table
 
 
-def get_table_hh(languages, title='HeadHunter Moscow'):
-    return get_table(languages, title)
-
-
-def get_table_sj(languages, title='SuperJob Moscow'):
-    return get_table(languages, title)
-
-
-def collect_vacancies_for_top8(secret_key_sj, login_sj,
-                               password_sj, id_sj, source='sj'):
+def collect_vacancies_for_top8_hh():
     top_8_languages = ['JavaScript', 'Java', 'Python',
                        'Ruby', 'PHP', 'C++', 'C#', 'Go']
     vacancies = {}
     for name in top_8_languages:
         vacancies[name] = []
-        if source == 'sj':
-            get_all_vacancies_from_sj(vacancies, secret_key_sj,
-                                      login_sj, password_sj, id_sj, language=name)
-        else:
-            get_all_vacancies_from_hh(vacancies, language=name)
+        get_all_vacancies_from_hh(vacancies, language=name)
     return vacancies
 
 
-def count_average_salary(secret_key_sj, login_sj, password_sj, id_sj, source='sj'):
-    vacancies = collect_vacancies_for_top8(secret_key_sj,
-                                           login_sj, password_sj, id_sj, source=source)
+def count_average_salary_hh():
+    vacancies = collect_vacancies_for_top8_hh()
     languages = {}
     for name_language in vacancies.keys():
         languages[name_language] = {'vacancies_found': 0,
                                     'vacancies_processed': 0, 'average_salary': 0}
-        if source == 'sj':
-            languages[name_language]['vacancies_found'] = \
-                get_vacancies_from_sj(secret_key_sj,
-                                      login_sj, password_sj,
-                                      id_sj, language=name_language)['total']
-        else:
-            languages[name_language]['vacancies_found'] = \
-                get_number_of_vacancies_hh(language=name_language)
+        languages[name_language]['vacancies_found'] = \
+            get_number_of_vacancies_hh(language=name_language)
         languages[name_language]['average_salary'], languages[name_language]['vacancies_processed'] \
-            = get_salary_of_vacancies(vacancies, name_language, source=source)
+            = get_salary_of_vacancies_hh(vacancies, name_language)
+    return languages
+
+
+def collect_vacancies_for_top8_sj(secret_key_sj, login_sj, password_sj, id_sj):
+    top_8_languages = ['JavaScript', 'Java', 'Python',
+                       'Ruby', 'PHP', 'C++', 'C#', 'Go']
+    vacancies = {}
+    for name in top_8_languages:
+        vacancies[name] = []
+        get_all_vacancies_from_sj(vacancies, secret_key_sj, login_sj, password_sj, id_sj, language=name)
+    return vacancies
+
+
+def count_average_salary_sj(secret_key_sj, login_sj, password_sj, id_sj):
+    vacancies = collect_vacancies_for_top8_sj(secret_key_sj,
+                                           login_sj, password_sj, id_sj)
+    languages = {}
+    for name_language in vacancies.keys():
+        languages[name_language] = {'vacancies_found': 0,
+                                    'vacancies_processed': 0, 'average_salary': 0}
+        languages[name_language]['vacancies_found'] = \
+            get_vacancies_from_sj(secret_key_sj, login_sj, password_sj, id_sj, language=name_language)['total']
+        languages[name_language]['average_salary'], languages[name_language]['vacancies_processed'] \
+            = get_salary_of_vacancies_sj(vacancies, name_language)
     return languages
 
 
@@ -170,10 +179,8 @@ def main():
     login_sj = os.getenv("LOGIN_SUPERJOB")
     password_sj = os.getenv("PASSWORD_SUPERJOB")
     id_sj = os.getenv("CLIENT_ID_SUPERJOB")
-    table_hh = get_table_hh(count_average_salary(secret_key_sj,
-                                                 login_sj, password_sj, id_sj, source='hh'))
-    table_sj = get_table_sj(count_average_salary(secret_key_sj,
-                                                 login_sj, password_sj, id_sj, source='sj'))
+    table_hh = get_table(count_average_salary_hh(), title='HeadHunter Moscow')
+    table_sj = get_table(count_average_salary_sj(secret_key_sj, login_sj, password_sj, id_sj))
     print(table_hh.table)
     print(table_sj.table)
 
