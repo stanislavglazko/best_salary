@@ -21,8 +21,9 @@ def get_vacancies_from_hh(language='Python',
     return response.json()
 
 
-def get_all_vacancies_from_hh(vacancies, language='Python',
+def get_all_vacancies_from_hh(language='Python',
                               text='Программист', area=1, period=30):
+    vacancies = []
     page = 0
     pages_number = 1
     while page < pages_number:
@@ -32,7 +33,8 @@ def get_all_vacancies_from_hh(vacancies, language='Python',
         pages_number = min(int(response['found'] / 20), 100)
         page += 1
         for vacancy in response['items']:
-            vacancies[language].append(vacancy)
+            vacancies.append(vacancy)
+    return vacancies
 
 
 def predict_salary(payment_from, payment_to):
@@ -85,7 +87,8 @@ def sj_authorization(secret_key_sj, login_sj, password_sj, id_sj):
 
 
 def get_vacancies_from_sj(secret_key_sj, login_sj,
-                          password_sj, id_sj, town=4, page=0, language='Python'):
+                          password_sj, id_sj, town=4,
+                          page=0, language='Python'):
     url = 'https://api.superjob.ru/2.33/vacancies/'
     token = sj_authorization(secret_key_sj, login_sj, password_sj, id_sj)
     headers = {
@@ -108,9 +111,10 @@ def predict_rub_salary_sj(vacancy):
         return predict_salary(vacancy['payment_from'], vacancy['payment_to'])
 
 
-def get_all_vacancies_from_sj(vacancies, secret_key_sj, login_sj,
+def get_all_vacancies_from_sj(secret_key_sj, login_sj,
                               password_sj, id_sj,
                               town=4, page=0, language='Python'):
+    vacancies = []
     page = 0
     more_vacancies = True
     while more_vacancies:
@@ -125,8 +129,9 @@ def get_all_vacancies_from_sj(vacancies, secret_key_sj, login_sj,
         )
         more_vacancies = response['more']
         for vacancy in response['objects']:
-            vacancies[language].append(vacancy)
+            vacancies.append(vacancy)
         page += 1
+    return vacancies
 
 
 def get_table(languages, title='SuperJob Moscow'):
@@ -163,8 +168,7 @@ def collect_vacancies_for_top8_hh():
     ]
     vacancies = {}
     for name in top_8_languages:
-        vacancies[name] = []
-        get_all_vacancies_from_hh(vacancies, language=name)
+        vacancies[name] = get_all_vacancies_from_hh(language=name)
     return vacancies
 
 
@@ -197,9 +201,7 @@ def collect_vacancies_for_top8_sj(secret_key_sj, login_sj, password_sj, id_sj):
     ]
     vacancies = {}
     for name in top_8_languages:
-        vacancies[name] = []
-        get_all_vacancies_from_sj(
-            vacancies,
+        vacancies[name] = get_all_vacancies_from_sj(
             secret_key_sj,
             login_sj,
             password_sj,
@@ -243,7 +245,12 @@ def main():
     password_sj = os.getenv("PASSWORD_SUPERJOB")
     id_sj = os.getenv("CLIENT_ID_SUPERJOB")
     table_hh = get_table(count_average_salary_hh(), title='HeadHunter Moscow')
-    table_sj = get_table(count_average_salary_sj(secret_key_sj, login_sj, password_sj, id_sj))
+    table_sj = get_table(count_average_salary_sj(
+        secret_key_sj,
+        login_sj,
+        password_sj,
+        id_sj,
+    ))
     print(table_hh.table)
     print(table_sj.table)
 
