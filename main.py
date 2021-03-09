@@ -23,7 +23,7 @@ def get_vacancies_from_hh(language='Python',
 
 def get_all_vacancies_from_hh(language='Python',
                               text='Программист', area=1, period=30):
-    vacancies = []
+    language_vacancies = []
     page = 0
     pages_number = 1
     while page < pages_number:
@@ -33,8 +33,8 @@ def get_all_vacancies_from_hh(language='Python',
         pages_number = min(int(response['found'] / 20), 100)
         page += 1
         for vacancy in response['items']:
-            vacancies.append(vacancy)
-    return vacancies
+            language_vacancies.append(vacancy)
+    return language_vacancies
 
 
 def predict_salary(payment_from, payment_to):
@@ -114,7 +114,7 @@ def predict_rub_salary_sj(vacancy):
 def get_all_vacancies_from_sj(secret_key_sj, login_sj,
                               password_sj, id_sj,
                               town=4, page=0, language='Python'):
-    vacancies = []
+    language_vacancies = []
     page = 0
     more_vacancies = True
     while more_vacancies:
@@ -129,9 +129,9 @@ def get_all_vacancies_from_sj(secret_key_sj, login_sj,
         )
         more_vacancies = response['more']
         for vacancy in response['objects']:
-            vacancies.append(vacancy)
+            language_vacancies.append(vacancy)
         page += 1
-    return vacancies
+    return language_vacancies
 
 
 def get_table(languages, title='SuperJob Moscow'):
