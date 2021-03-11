@@ -156,25 +156,15 @@ def get_table(languages, title='SuperJob Moscow'):
     return table
 
 
-def collect_vacancies_for_top8_hh():
-    top_8_languages = [
-        'JavaScript',
-        'Java',
-        'Python',
-        'Ruby',
-        'PHP',
-        'C++',
-        'C#',
-        'Go',
-    ]
+def collect_vacancies_for_top8_hh(top_8_languages):
     vacancies = {}
     for name in top_8_languages:
         vacancies[name] = get_all_vacancies_from_hh(language=name)
     return vacancies
 
 
-def count_average_salary_hh():
-    vacancies = collect_vacancies_for_top8_hh()
+def count_average_salary_hh(top_8_languages):
+    vacancies = collect_vacancies_for_top8_hh(top_8_languages)
     languages = {}
     for language_name in vacancies.keys():
         languages[language_name] = defaultdict(int)
@@ -185,17 +175,7 @@ def count_average_salary_hh():
     return languages
 
 
-def collect_vacancies_for_top8_sj(secret_key_sj, login_sj, password_sj, id_sj):
-    top_8_languages = [
-        'JavaScript',
-        'Java',
-        'Python',
-        'Ruby',
-        'PHP',
-        'C++',
-        'C#',
-        'Go',
-    ]
+def collect_vacancies_for_top8_sj(top_8_languages, secret_key_sj, login_sj, password_sj, id_sj):
     vacancies = {}
     for name in top_8_languages:
         vacancies[name] = get_all_vacancies_from_sj(
@@ -208,8 +188,9 @@ def collect_vacancies_for_top8_sj(secret_key_sj, login_sj, password_sj, id_sj):
     return vacancies
 
 
-def count_average_salary_sj(secret_key_sj, login_sj, password_sj, id_sj):
+def count_average_salary_sj(top_8_languages, secret_key_sj, login_sj, password_sj, id_sj):
     vacancies = collect_vacancies_for_top8_sj(
+        top_8_languages,
         secret_key_sj,
         login_sj,
         password_sj,
@@ -232,13 +213,24 @@ def count_average_salary_sj(secret_key_sj, login_sj, password_sj, id_sj):
 
 
 def main():
+    top_8_languages = [
+        'JavaScript',
+        'Java',
+        'Python',
+        'Ruby',
+        'PHP',
+        'C++',
+        'C#',
+        'Go',
+    ]
     load_dotenv()
     secret_key_sj = os.getenv("SECRET_KEY_SUPERJOB")
     login_sj = os.getenv("LOGIN_SUPERJOB")
     password_sj = os.getenv("PASSWORD_SUPERJOB")
     id_sj = os.getenv("CLIENT_ID_SUPERJOB")
-    table_hh = get_table(count_average_salary_hh(), title='HeadHunter Moscow')
+    table_hh = get_table(count_average_salary_hh(top_8_languages), title='HeadHunter Moscow')
     table_sj = get_table(count_average_salary_sj(
+        top_8_languages,
         secret_key_sj,
         login_sj,
         password_sj,
