@@ -49,7 +49,10 @@ def predict_salary(payment_from, payment_to):
 
 def predict_rub_salary_hh(vacancy):
     if vacancy['salary'] and vacancy['salary']['currency'] == 'RUR':
-        return predict_salary(vacancy['salary']['from'], vacancy['salary']['to'])
+        return predict_salary(
+            vacancy['salary']['from'],
+            vacancy['salary']['to'],
+        )
 
 
 def get_salary_of_vacancies(vacancies, function, language='Python'):
@@ -158,9 +161,15 @@ def count_average_salary_hh(top_8_languages):
     for language_name in vacancies.keys():
         languages[language_name] = defaultdict(int)
         languages[language_name]['vacancies_found'] = \
-            get_vacancies_from_hh(language=language_name)['found']
+            get_vacancies_from_hh(
+                language=language_name,
+            )['found']
         languages[language_name]['average_salary'], languages[language_name]['vacancies_processed'] \
-            = get_salary_of_vacancies(vacancies, predict_rub_salary_hh, language_name)
+            = get_salary_of_vacancies(
+            vacancies,
+            predict_rub_salary_hh,
+            language_name,
+        )
     return languages
 
 
@@ -179,7 +188,13 @@ def collect_vacancies_for_top8_sj(top_8_languages, token,
     return vacancies
 
 
-def count_average_salary_sj(top_8_languages, token, secret_key_sj, login_sj, password_sj, id_sj):
+def count_average_salary_sj(
+        top_8_languages,
+        token,
+        secret_key_sj,
+        login_sj,
+        password_sj,
+        id_sj):
     vacancies = collect_vacancies_for_top8_sj(
         top_8_languages,
         token,
@@ -201,7 +216,11 @@ def count_average_salary_sj(top_8_languages, token, secret_key_sj, login_sj, pas
                 language=language_name,
             )['total']
         languages[language_name]['average_salary'], languages[language_name]['vacancies_processed'] \
-            = get_salary_of_vacancies(vacancies, predict_rub_salary_sj, language_name)
+            = get_salary_of_vacancies(
+            vacancies,
+            predict_rub_salary_sj,
+            language_name,
+        )
     return languages
 
 
@@ -221,8 +240,16 @@ def main():
     login_sj = os.getenv("LOGIN_SUPERJOB")
     password_sj = os.getenv("PASSWORD_SUPERJOB")
     id_sj = os.getenv("CLIENT_ID_SUPERJOB")
-    token = sj_authorization(secret_key_sj, login_sj, password_sj, id_sj)
-    table_hh = get_table(count_average_salary_hh(top_8_languages), title='HeadHunter Moscow')
+    token = sj_authorization(
+        secret_key_sj,
+        login_sj,
+        password_sj,
+        id_sj,
+    )
+    table_hh = get_table(
+        count_average_salary_hh(top_8_languages),
+        title='HeadHunter Moscow',
+    )
     table_sj = get_table(count_average_salary_sj(
         top_8_languages,
         token,
