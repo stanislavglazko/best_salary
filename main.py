@@ -1,6 +1,7 @@
 import os
 
 import requests
+from collections import defaultdict
 
 from dotenv import load_dotenv
 from terminaltables import AsciiTable
@@ -176,11 +177,7 @@ def count_average_salary_hh():
     vacancies = collect_vacancies_for_top8_hh()
     languages = {}
     for language_name in vacancies.keys():
-        languages[language_name] = {
-            'vacancies_found': 0,
-            'vacancies_processed': 0,
-            'average_salary': 0,
-        }
+        languages[language_name] = defaultdict(int)
         languages[language_name]['vacancies_found'] = \
             get_vacancies_from_hh(language=language_name)['found']
         languages[language_name]['average_salary'], languages[language_name]['vacancies_processed'] \
@@ -220,11 +217,7 @@ def count_average_salary_sj(secret_key_sj, login_sj, password_sj, id_sj):
     )
     languages = {}
     for language_name in vacancies.keys():
-        languages[language_name] = {
-            'vacancies_found': 0,
-            'vacancies_processed': 0,
-            'average_salary': 0,
-        }
+        languages[language_name] = defaultdict(int)
         languages[language_name]['vacancies_found'] = \
             get_vacancies_from_sj(
                 secret_key_sj,
