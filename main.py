@@ -135,14 +135,14 @@ def get_all_vacancies_from_sj(secret_key_sj, login_sj,
 
 
 def get_table(languages, title='SuperJob Moscow'):
-    table_data = []
+    table_rows = []
     headers = [
         'Язык программирования',
         'Вакансий найдено',
         'Вакансий обработано',
         'Средняя зарплата',
     ]
-    table_data.append(headers)
+    table_rows.append(headers)
     for language, statistic in languages.items():
         new_row = [
             language,
@@ -150,8 +150,8 @@ def get_table(languages, title='SuperJob Moscow'):
             statistic['vacancies_processed'],
             statistic['average_salary'],
         ]
-        table_data.append(new_row)
-    table = AsciiTable(table_data, title=title)
+        table_rows.append(new_row)
+    table = AsciiTable(table_rows, title=title)
     return table
 
 
@@ -175,16 +175,16 @@ def collect_vacancies_for_top8_hh():
 def count_average_salary_hh():
     vacancies = collect_vacancies_for_top8_hh()
     languages = {}
-    for name_language in vacancies.keys():
-        languages[name_language] = {
+    for language_name in vacancies.keys():
+        languages[language_name] = {
             'vacancies_found': 0,
             'vacancies_processed': 0,
             'average_salary': 0,
         }
-        languages[name_language]['vacancies_found'] = \
-            get_vacancies_from_hh(language=name_language)['found']
-        languages[name_language]['average_salary'], languages[name_language]['vacancies_processed'] \
-            = get_salary_of_vacancies_hh(vacancies, name_language)
+        languages[language_name]['vacancies_found'] = \
+            get_vacancies_from_hh(language=language_name)['found']
+        languages[language_name]['average_salary'], languages[language_name]['vacancies_processed'] \
+            = get_salary_of_vacancies_hh(vacancies, language_name)
     return languages
 
 
@@ -219,22 +219,22 @@ def count_average_salary_sj(secret_key_sj, login_sj, password_sj, id_sj):
         id_sj,
     )
     languages = {}
-    for name_language in vacancies.keys():
-        languages[name_language] = {
+    for language_name in vacancies.keys():
+        languages[language_name] = {
             'vacancies_found': 0,
             'vacancies_processed': 0,
             'average_salary': 0,
         }
-        languages[name_language]['vacancies_found'] = \
+        languages[language_name]['vacancies_found'] = \
             get_vacancies_from_sj(
                 secret_key_sj,
                 login_sj,
                 password_sj,
                 id_sj,
-                language=name_language,
+                language=language_name,
             )['total']
-        languages[name_language]['average_salary'], languages[name_language]['vacancies_processed'] \
-            = get_salary_of_vacancies_sj(vacancies, name_language)
+        languages[language_name]['average_salary'], languages[language_name]['vacancies_processed'] \
+            = get_salary_of_vacancies_sj(vacancies, language_name)
     return languages
 
 
