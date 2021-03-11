@@ -1,8 +1,7 @@
 import os
-
-import requests
 from collections import defaultdict
 
+import requests
 from dotenv import load_dotenv
 from terminaltables import AsciiTable
 
@@ -31,7 +30,7 @@ def get_all_vacancies_from_hh(language='Python',
         response = get_vacancies_from_hh(language=language,
                                          text=text, area=area,
                                          period=period, page=page)
-        pages_number = min(int(response['found'] / 20), 100)
+        pages_number = response['pages']
         page += 1
         for vacancy in response['items']:
             language_vacancies.append(vacancy)
@@ -48,25 +47,15 @@ def predict_salary(payment_from, payment_to):
     return None
 
 
-def predict_rub_salary_hh(salary):
-    if salary and salary['currency'] == 'RUR':
-        return predict_salary(salary['from'], salary['to'])
+def predict_rub_salary_hh(vacancy):
+    if vacancy['salary'] and vacancy['salary']['currency'] == 'RUR':
+        return predict_salary(vacancy['salary']['from'], vacancy['salary']['to'])
 
 
-def get_salary_of_vacancies_hh(vacancies, language='Python'):
+def get_salary_of_vacancies(vacancies, function, language='Python'):
     salaries = []
     for vacancy in vacancies[language]:
-        salary = predict_rub_salary_hh(vacancy['salary'])
-        if salary:
-            salaries.append(salary)
-    if len(salaries) > 0:
-        return int(sum(salaries) / len(salaries)), len(salaries)
-
-
-def get_salary_of_vacancies_sj(vacancies, language='Python'):
-    salaries = []
-    for vacancy in vacancies[language]:
-        salary = predict_rub_salary_sj(vacancy)
+        salary = function(vacancy)
         if salary:
             salaries.append(salary)
     if len(salaries) > 0:
@@ -171,7 +160,7 @@ def count_average_salary_hh(top_8_languages):
         languages[language_name]['vacancies_found'] = \
             get_vacancies_from_hh(language=language_name)['found']
         languages[language_name]['average_salary'], languages[language_name]['vacancies_processed'] \
-            = get_salary_of_vacancies_hh(vacancies, language_name)
+            = get_salary_of_vacancies(vacancies, predict_rub_salary_hh, language_name)
     return languages
 
 
@@ -212,7 +201,7 @@ def count_average_salary_sj(top_8_languages, token, secret_key_sj, login_sj, pas
                 language=language_name,
             )['total']
         languages[language_name]['average_salary'], languages[language_name]['vacancies_processed'] \
-            = get_salary_of_vacancies_sj(vacancies, language_name)
+            = get_salary_of_vacancies(vacancies, predict_rub_salary_sj, language_name)
     return languages
 
 
