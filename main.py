@@ -55,10 +55,10 @@ def predict_rub_salary_hh(vacancy):
         )
 
 
-def get_salary_of_vacancies(vacancies, function, language='Python'):
+def get_salary_of_vacancies(vacancies, predict_rub_salary, language='Python'):
     salaries = []
     for vacancy in vacancies[language]:
-        salary = function(vacancy)
+        salary = predict_rub_salary(vacancy)
         if salary:
             salaries.append(salary)
     if len(salaries) > 0:
