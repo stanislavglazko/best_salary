@@ -148,15 +148,15 @@ def get_table(languages, title='SuperJob Moscow'):
     return table
 
 
-def collect_vacancies_for_top8_hh(top_8_languages):
+def collect_vacancies_from_hh(top_languages):
     vacancies = {}
-    for name in top_8_languages:
+    for name in top_languages:
         vacancies[name] = get_all_vacancies_from_hh(language=name)
     return vacancies
 
 
-def count_average_salary_hh(top_8_languages):
-    vacancies = collect_vacancies_for_top8_hh(top_8_languages)
+def count_average_salary_hh(top_languages):
+    vacancies = collect_vacancies_from_hh(top_languages)
     languages = defaultdict(lambda: defaultdict())
     for language_name in vacancies.keys():
         languages[language_name]['vacancies_found'] = \
@@ -172,10 +172,10 @@ def count_average_salary_hh(top_8_languages):
     return languages
 
 
-def collect_vacancies_for_top8_sj(top_8_languages, token,
+def collect_vacancies_from_sj(top_languages, token,
                                   secret_key_sj, login_sj, password_sj, id_sj):
     vacancies = {}
-    for name in top_8_languages:
+    for name in top_languages:
         vacancies[name] = get_all_vacancies_from_sj(
             secret_key_sj,
             token,
@@ -188,14 +188,14 @@ def collect_vacancies_for_top8_sj(top_8_languages, token,
 
 
 def count_average_salary_sj(
-        top_8_languages,
+        top_languages,
         token,
         secret_key_sj,
         login_sj,
         password_sj,
         id_sj):
-    vacancies = collect_vacancies_for_top8_sj(
-        top_8_languages,
+    vacancies = collect_vacancies_from_sj(
+        top_languages,
         token,
         secret_key_sj,
         login_sj,
@@ -223,7 +223,7 @@ def count_average_salary_sj(
 
 
 def main():
-    top_8_languages = [
+    top_languages = [
         'JavaScript',
         'Java',
         'Python',
@@ -245,11 +245,11 @@ def main():
         id_sj,
     )
     table_hh = get_table(
-        count_average_salary_hh(top_8_languages),
+        count_average_salary_hh(top_languages),
         title='HeadHunter Moscow',
     )
     table_sj = get_table(count_average_salary_sj(
-        top_8_languages,
+        top_languages,
         token,
         secret_key_sj,
         login_sj,
