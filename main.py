@@ -157,9 +157,8 @@ def collect_vacancies_for_top8_hh(top_8_languages):
 
 def count_average_salary_hh(top_8_languages):
     vacancies = collect_vacancies_for_top8_hh(top_8_languages)
-    languages = {}
+    languages = defaultdict(lambda: defaultdict())
     for language_name in vacancies.keys():
-        languages[language_name] = defaultdict(int)
         languages[language_name]['vacancies_found'] = \
             get_vacancies_from_hh(
                 language=language_name,
@@ -203,9 +202,8 @@ def count_average_salary_sj(
         password_sj,
         id_sj,
     )
-    languages = {}
+    languages = defaultdict(lambda: defaultdict())
     for language_name in vacancies.keys():
-        languages[language_name] = defaultdict(int)
         languages[language_name]['vacancies_found'] = \
             get_vacancies_from_sj(
                 secret_key_sj,
